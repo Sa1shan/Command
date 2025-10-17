@@ -16,11 +16,9 @@ namespace _Source
 
         [Header("Queue Settings")]
         private const int MaxQueueSize = 10;
-
-        // Очередь команд спавна с сохраненными позициями
+        
         private Queue<SpawnPrefabCommand> _rightClickCommandQueue = new Queue<SpawnPrefabCommand>();
-    
-        // История выполненных команд для отмены
+        
         private Stack<ICommand> _commandHistory = new Stack<ICommand>();
 
         private void Start()
@@ -35,27 +33,23 @@ namespace _Source
 
         private void HandleInput()
         {
-            // ЛКМ - немедленное выполнение команды перемещения
             if (Input.GetMouseButtonDown(0))
             {
                 Vector2 mousePosition = GetMouseWorldPosition();
                 ExecuteLeftClickCommand(mousePosition);
             }
-
-            // ПКМ - добавление команды спавна в очередь
+            
             if (Input.GetMouseButtonDown(1))
             {
                 Vector2 mousePosition = GetMouseWorldPosition();
                 AddRightClickCommandToQueue(mousePosition);
             }
-
-            // Колесо мыши - отмена последней команды
+            
             if (Input.GetMouseButtonDown(2))
             {
                 UndoLastCommand();
             }
-
-            // Enter - выполнение всей очереди команд ПКМ
+            
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 ExecuteRightClickQueue();
@@ -66,11 +60,9 @@ namespace _Source
         {
             if (characterToMove != null)
             {
-                // СОЗДАЕМ НОВУЮ КОМАНДУ для каждого перемещения
                 ICommand moveCommand = new MoveCharacterCommand(characterToMove, position);
                 moveCommand.Invoke(position);
-            
-                // Добавляем в историю для возможной отмены
+                
                 AddToHistory(moveCommand);
             
                 Debug.Log("Left-click command executed immediately");
@@ -82,10 +74,8 @@ namespace _Source
         {
             if (prefabToSpawn != null)
             {
-                // СОЗДАЕМ НОВУЮ КОМАНДУ с сохранением позиции
                 SpawnPrefabCommand newSpawnCommand = new SpawnPrefabCommand(prefabToSpawn, position);
-            
-                // Добавляем в очередь ПКМ
+                
                 _rightClickCommandQueue.Enqueue(newSpawnCommand);
             
                 Debug.Log($"Right-click command added to queue at position {position}. Queue size: {_rightClickCommandQueue.Count}");
@@ -102,14 +92,12 @@ namespace _Source
             }
 
             Debug.Log($"Executing right-click queue with {_rightClickCommandQueue.Count} commands");
-
-            // Выполняем все команды в очереди ПКМ
+            
             while (_rightClickCommandQueue.Count > 0)
             {
                 SpawnPrefabCommand command = _rightClickCommandQueue.Dequeue();
-                command.Invoke(Vector2.zero); // Позиция уже сохранена в команде
+                command.Invoke(Vector2.zero);
                 
-                // Добавляем в историю как ICommand
                 AddToHistory(command);
             }
 
@@ -119,10 +107,8 @@ namespace _Source
 
         private void AddToHistory(ICommand command)
         {
-            // Управляем размером истории
             if (_commandHistory.Count >= MaxQueueSize)
             {
-                // Удаляем самую старую команду
                 ClearOldestCommand();
             }
 
@@ -184,24 +170,6 @@ namespace _Source
             {
                 historyInfoText.text = $"История команд: {_commandHistory.Count}/{MaxQueueSize}";
             }
-        }
-
-        // Методы для отладки
-        public int GetRightClickQueueSize()
-        {
-            return _rightClickCommandQueue.Count;
-        }
-
-        public int GetHistorySize()
-        {
-            return _commandHistory.Count;
-        }
-
-        public void ClearRightClickQueue()
-        {
-            _rightClickCommandQueue.Clear();
-            Debug.Log("Right-click queue cleared");
-            UpdateUI();
         }
     }
 }

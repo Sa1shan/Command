@@ -4,31 +4,30 @@ namespace _Source
 {
     public class SpawnPrefabCommand : ICommand
     {
-        private GameObject prefab;
-        private GameObject spawnedObject;
-        private Vector2 spawnPosition;
+        private GameObject _prefab;
+        private GameObject _spawnedObject;
+        private Vector2 _spawnPosition;
 
         public SpawnPrefabCommand(GameObject prefabToSpawn, Vector2 position)
         {
-            prefab = prefabToSpawn;
-            spawnPosition = position; // Сохраняем позицию при создании
+            _prefab = prefabToSpawn;
+            _spawnPosition = position;
         }
 
         public void Invoke(Vector2 position)
         {
-            // Используем сохраненную позицию
-            if (prefab != null)
+            if (_prefab != null)
             {
-                spawnedObject = Object.Instantiate(prefab, spawnPosition, Quaternion.identity);
-                Debug.Log($"Spawned prefab at {spawnPosition}");
+                _spawnedObject = Object.Instantiate(_prefab, _spawnPosition, Quaternion.identity);
+                Debug.Log($"Spawned prefab at {_spawnPosition}");
             }
         }
 
         public void Undo()
         {
-            if (spawnedObject != null)
+            if (_spawnedObject != null)
             {
-                Object.Destroy(spawnedObject);
+                Object.Destroy(_spawnedObject);
                 Debug.Log("Undo: Destroyed spawned prefab");
             }
         }
